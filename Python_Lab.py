@@ -14,3 +14,5 @@ dfcgvhb
 print b
 print(type(a))
 
+# gia delete
+del(a)
