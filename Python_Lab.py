@@ -67,3 +67,94 @@ else:
 lista = ['a',1]
 l2 = [item for item in lista if(type(item) is str)]
 print l2
+
+# to null ths python
+null = None
+a = None
+if ( a is None):
+    print "None"
+
+# pws grafw se arxeio
+f = open('onomaaaaa.txt','w')
+f.write('grammi 1\n')
+f.write('grammi 2\n')
+f.close()
+
+
+# with as gia arxeia kai dinei nick name sto antikeimeno ...a=append
+with open('onomeaaa.txt','w') as f :
+    f.close()
+
+
+# to diabazei olo to arxeio
+with open('onomaaaaa.txt','r') as f :
+    print f.read()
+    f.close()
+
+#sunarthseis
+def func(a,b):
+    return a+b
+print func(1,3)
+
+#sunarthseis
+def func(a,b=5):
+    return a+b
+
+print func(1)
+print func(1,6)
+print func(a=1,b=6)
+print func(b=1,6)
+
+
+
+l=[1.1,2,3,4,5,6]
+def fun (l):
+    l=[ i for i in l if (i%2==1)]
+    #
+    l2 = []
+    for i in l:
+        if (i%2==1):
+            l2.append(i)
+    l = l2
+    #
+    f = open('./monoi.txt','w')
+    f.write(str(l))
+    f.close()
+
+
+with open('./monoi.txt') as f :
+    print f.read()
+    f.close()
+
+
+l=[1,2,3,4,5,6]
+def fun (l):
+    l=[ i for i in range (1,7) if (i%2==1)]
+    with open('monoi.txt','w') as f :
+        f.write(l)
+        print f.read()
+        f.close()
+
+l=[1,2,3,4]
+l=[ i for i in range (1,6) if (i%2==1)]
+print l
+
+l=[1,2,3,4]
+l=[ i for i in range (1,5) if (i%2==1)]
+print l
+
+l = [1, 2, 3, 4]
+
+
+def fun(l):
+    l = [str(i) + '\n' for i in range(1, 5) if (i % 2 == 1)]
+    with open('monoi.txt', 'w') as f:
+        f.writelines(l)
+        f.close()
+
+    with open('monoi.txt', 'r') as f:
+        print f.readlines()
+        f.close()
+
+
+fun (l)
