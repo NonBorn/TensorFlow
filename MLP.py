@@ -1,15 +1,17 @@
-from __future__ import print_function
-
-# Import MNIST data
+#from __future__ import print_function
+import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
 
-import tensorflow as tf
+mnist = ("")
+
+mnist
+
 
 # Parameters
 learning_rate = 0.001
 training_epochs = 15
-batch_size = 100
+batch_size = 1
 display_step = 1
 
 # Network Parameters
@@ -80,13 +82,14 @@ with tf.Session() as sess:
         if epoch % display_step == 0:
             test_acc = accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
             print(
-                "Epoch:",
-                '%04d' % (epoch+1),
-                "cost=",
-                "{:.9f}".format(avg_cost),
-                "average_train_accuracy=",
-                "{:.6f}".format(avg_acc),
-                "test_accuracy=",
-                "{:.6f}".format(test_acc)
+                #"Epoch:",
+                #'%04d' % (epoch+1),
+                #"cost=",
+                #"{:.9f}".format(avg_cost),
+                #"average_train_accuracy=",
+                #"{:.6f}".format(avg_acc),
+                #"test_accuracy=",
+                #"{:.6f}".format(test_acc)
+                batch_x
             )
     print("Optimization Finished!")
