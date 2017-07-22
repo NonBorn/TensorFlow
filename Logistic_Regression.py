@@ -92,32 +92,3 @@ with tf.Session() as sess:
             costs.append(avg_cost)
             #
     print("Optimization Finished!")
-
-
-
-#%matplotlib inline
-#%pylab inline
-#pylab.rcParams['figure.figsize'] = (20, 6)
-from matplotlib.pyplot import figure
-
-fig1 = figure()
-
-ax = fig1.add_subplot(121)
-ax.clear()
-
-ax.set_title("Learning curve")
-ax.set_xlabel('Epochs')
-ax.set_ylabel('Accuracy')
-ax.set_ylim([0, 1])
-ax.plot(epochs, tr_acc,     'o-', color="g", label="Train Accuracy")
-ax.plot(epochs, test_acc,   'o-', color="r", label="Test Accuracy")
-
-ax2 = fig1.add_subplot(122)
-ax2.clear()
-
-ax2.set_title("Train cost")
-ax2.set_xlabel('Epochs')
-ax2.set_ylabel('Cost')
-#ax2.set_ylim(bottom=0 )
-ax2.set_ylim(ymin=0)
-ax2.plot(epochs, costs, 'o-', color="r", label="Train cost")
