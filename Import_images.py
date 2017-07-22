@@ -1,19 +1,79 @@
 import os
 import numpy as np
 from PIL import Image
+import regex as re
 
+# define file path of the folder of images
 import tensorflow as tf
-#path = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/sketches/airplane'
+#path = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/rendered_256x256/256x256/sketch/tx_000000000000'
 path = '/Users/nonborn/Desktop/test/'
 
-files = [ path+f for f in  os.listdir(path)]
-
-print(len(files))
 
 
+#print(len(files))
+print(os.listdir(path))
+
+
+reg = re.compile("^\.")
+filenames = [x for x in os.listdir(path) if not reg.match(x)]
+
+print (filenames)
+#print(len(filenames))
+
+f_im = path + filenames[0]
+print(f_im)
+
+
+files = [f_im + '/'+f for f in os.listdir(f_im)]
+print(files)
+#print('----')
+
+
+def get_numpy(fpath):
+    im = Image.open(fpath)
+    im = im.convert('L') # to convert an image to grayscale
+    im = np.asarray(im, dtype=np.float32)
+    return im
+
+
+def batch(files_list,child_index,b_size,position):
+    path = '/Users/nonborn/Desktop/test/'
+    lpath = path + files_list[child_index]
+    reg = re.compile("^\.")
+    images = [lpath + '/' + x for x in os.listdir(lpath) if not reg.match(x)]
+    print(lpath)
+    print(images[0])
+    #if position + b_size <= len(files_list[child_index]):
+    batch_xx = np.asarray([get_numpy(images[0])])
+    #batch_xx = np.asarray([get_numpy(fpath) for fpath in images[position:position+b_size]])
+    return batch_xx
 
 
 
+child_index = 0
+position = 0
+b_size = 1
+
+#print(filenames)
+
+im = Image.open('/Users/nonborn/Desktop/test/airplane/n02691156_58-1.png')
+print(im)
+
+x = batch(filenames,child_index,b_size,position)
+
+print(len(x))
+print(x[1])
+
+
+
+
+
+
+
+
+
+
+'''
 
 def get_numpy(fpath):
     im = Image.open(fpath)
@@ -142,6 +202,7 @@ with tf.Session() as sess:
     # Keep training until reach max iterations
     while step * batch_size < training_iters:
         batch_x = batch
+        cnt = cnt + batch_size
         batch_y = [1, 0]
             #mnist.train.next_batch(batch_size)
         # Run optimization op (backprop)
@@ -161,3 +222,4 @@ with tf.Session() as sess:
     print("Optimization Finished!")
 
 
+'''
