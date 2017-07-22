@@ -5,66 +5,63 @@ import regex as re
 
 # define file path of the folder of images
 import tensorflow as tf
-#path = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/rendered_256x256/256x256/sketch/tx_000000000000'
-path = '/Users/nonborn/Desktop/test/'
 
+path_init = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/rendered_256x256/256x256/sketch/tx_000000000000'
+#path_init = '/Users/nonborn/Desktop/test/'
 
-
-#print(len(files))
-print(os.listdir(path))
-
+# print(len(files))
+#print('Folders in Directory of Parent Folder')
+#print(os.listdir(path_init))
 
 reg = re.compile("^\.")
-filenames = [x for x in os.listdir(path) if not reg.match(x)]
+filenames = [x for x in os.listdir(path_init) if not reg.match(x)]
 
-print (filenames)
+
+#print('Folders in Directory of Parent Folder - After filtering')
+#print (filenames)
 #print(len(filenames))
 
-f_im = path + filenames[0]
-print(f_im)
+#f_im = path_init + filenames[0]
+#print(f_im)
+
+#files = [f_im + '/' + f for f in os.listdir(f_im)]
+#print(files)
 
 
-files = [f_im + '/'+f for f in os.listdir(f_im)]
-print(files)
-#print('----')
+# print('----')
 
 
 def get_numpy(fpath):
     im = Image.open(fpath)
-    im = im.convert('L') # to convert an image to grayscale
+    im = im.convert('L')  # to convert an image to grayscale
     im = np.asarray(im, dtype=np.float32)
     return im
 
 
-def batch(files_list,child_index,b_size,position):
-    path = '/Users/nonborn/Desktop/test/'
-    lpath = path + files_list[child_index]
-    reg = re.compile("^\.")
-    images = [lpath + '/' + x for x in os.listdir(lpath) if not reg.match(x)]
-    print(lpath)
-    print(images[0])
-    #if position + b_size <= len(files_list[child_index]):
-    batch_xx = np.asarray([get_numpy(images[0])])
-    #batch_xx = np.asarray([get_numpy(fpath) for fpath in images[position:position+b_size]])
+def batch(files_list, child_index, b_size, position):
+    #path = '/Users/nonborn/Desktop/test/'
+    lpath = path_init + '/' + files_list[child_index]
+    reg1 = re.compile("^\.")
+    test = [x for x in os.listdir(lpath) if not reg.match(x)]
+    #print(test)
+    image_paths = [lpath + '/' + f for f in test]
+    if position + b_size <= len(test):
+        batch_xx = np.asarray([get_numpy(fpath) for fpath in image_paths[position:position+b_size]])
     return batch_xx
-
 
 
 child_index = 0
 position = 0
-b_size = 1
+b_size = 100
 
-#print(filenames)
 
-im = Image.open('/Users/nonborn/Desktop/test/airplane/n02691156_58-1.png')
-print(im)
 
-x = batch(filenames,child_index,b_size,position)
+x = batch(filenames, child_index, b_size, position)
 
 print(len(x))
-print(x[1])
-
-
+print(x[0])
+image = x[0, :]
+print x.shape
 
 
 
