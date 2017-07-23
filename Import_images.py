@@ -43,12 +43,12 @@ def get_numpy(fpath):
     im = np.asarray(im, dtype=np.float32)
     return im
 
+
+# batch_X Variables:
+# ------------------
 # files_list: list with the names of all the subfolders of the path
 # child_index: pointer which has the starting folder of the files_list
 # position: position index within the folder
-
-
-
 def batch_X(files_list, child_index, b_size, pos_index):
     lpath = path_init + '/' + files_list[child_index]
     reg1 = re.compile("^\.")
@@ -96,22 +96,15 @@ def batch_X(files_list, child_index, b_size, pos_index):
 #     return
 
 
-# Vocuabulary
+# Vocuabulary & 1 hot vectors
 text_idx = range(0,125)
-print(text_idx)
-
+#print(text_idx)
 vocab_size = len(filenames)
 text_length = len(text_idx)
 one_hot = np.zeros(([vocab_size, text_length]))
-print(len(one_hot))
+#print(len(one_hot))
 one_hot[text_idx, np.arange(text_length)] = 1
-
 one_hot = one_hot.astype(int)
-
-
-print(len(one_hot))
-print(one_hot[124])
-
 
 
 
