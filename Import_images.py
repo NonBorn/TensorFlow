@@ -44,12 +44,25 @@ def get_numpy(fpath):
     return im
 
 
-# batch_X Variables:
+def one_hot_function(word):
+    # Vocuabulary & 1 hot vectors
+    text_idx = range(0,125)
+    #print(text_idx)
+    vocab_size = len(filenames)
+    text_length = len(text_idx)
+    one_hot = np.zeros(([vocab_size, text_length]))
+    one_hot[text_idx, np.arange(text_length)] = 1
+    one_hot = one_hot.astype(int)
+    return one_hot[filenames.index(word)]
+
+
+
+# batch Variables:
 # ------------------
 # files_list: list with the names of all the subfolders of the path
 # child_index: pointer which has the starting folder of the files_list
 # position: position index within the folder
-def batch_X(files_list, child_index, b_size, pos_index):
+def batch(files_list, child_index, b_size, pos_index):
     lpath = path_init + '/' + files_list[child_index]
     reg1 = re.compile("^\.")
     test = [x for x in os.listdir(lpath) if not reg1.match(x)]
@@ -57,11 +70,14 @@ def batch_X(files_list, child_index, b_size, pos_index):
     # print(test)
 
     if pos_index + b_size <= len(test):
-        #print('true')
+        print('true')
         batch_xx = np.asarray([get_numpy(fpath) for fpath in image_paths[pos_index:pos_index + b_size]])
-        position = pos_index + b_size
+        batch_yy = np.asarray([one_hot_function(files_list[child_index]) for x in image_paths[pos_index:pos_index + b_size]])
+        pos_index = pos_index + b_size
     else:
-        #print('false')
+        print('false')
+        batch_yy1 = np.asarray([one_hot_function(files_list[child_index]) for x in image_paths[pos_index:len(test)]])
+
         image_paths = [x for x in image_paths[pos_index:len(test)]]
         add_images = b_size - (len(test) - pos_index)
         # print(add_images)
@@ -72,42 +88,20 @@ def batch_X(files_list, child_index, b_size, pos_index):
         reg1 = re.compile("^\.")
         test = [x for x in os.listdir(lpath1) if not reg1.match(x)]
         image_paths1 = [lpath1 + '/' + f for f in test]
+        batch_yy2 = np.asarray([one_hot_function(files_list[child_index]) for x in image_paths1[pos_index:add_images]])
+        #print(batch_yy2.shape)
+
         image_paths1 = [x for x in image_paths1[pos_index:add_images]]
-        # print (image_paths1)
+        #print (image_paths1)
 
         image_paths2 = image_paths + image_paths1
-        # print(image_paths2)
+        #print(image_paths2)
+
+        batch_yy = np.append(batch_yy1, batch_yy2, axis = 0)
 
         batch_xx = np.asarray([get_numpy(fpath) for fpath in image_paths2])
-        position = pos_index + add_images
-    return batch_xx, child_index, pos_index
-
-
-# def batch_Y(files_list, child_index, b_size, pos_index):
-#     lpath = path_init + '/' + files_list[child_index]
-#     reg1 = re.compile("^\.")
-#     test = [x for x in os.listdir(lpath) if not reg1.match(x)]
-#     image_paths = [lpath + '/' + f for f in test]
-#
-#     if pos_index + b_size <= len(test):
-#
-#     else:
-#
-#     return
-
-
-# Vocuabulary & 1 hot vectors
-text_idx = range(0,125)
-#print(text_idx)
-vocab_size = len(filenames)
-text_length = len(text_idx)
-one_hot = np.zeros(([vocab_size, text_length]))
-#print(len(one_hot))
-one_hot[text_idx, np.arange(text_length)] = 1
-one_hot = one_hot.astype(int)
-
-
-
+        pos_index = pos_index + add_images
+    return batch_xx,batch_yy, child_index, pos_index
 
 
 
@@ -116,15 +110,16 @@ one_hot = one_hot.astype(int)
 
 child_index = 0
 position = 708
-b_size = 21
+b_size = 20
 
-x = batch_X(filenames, child_index, b_size, position)
+x = batch(filenames, child_index, b_size, position)
 # print(x[0],x[2])
 # print(len(x))
 # print(x[0])
 # image = x[0, :]
 print x[0].shape
-print(x[1], x[2])
+print x[1].shape
+
 
 # np.savetxt(path_init+'/test.txt', x[0], delimiter=';', newline='\n')
 
