@@ -71,12 +71,12 @@ def batch(files_list, child_index, b_size, pos_index):
     # print(test)
 
     if pos_index + b_size <= len(test):
-        print('true')
+        #print('true')
         batch_xx = np.asarray([get_numpy(fpath) for fpath in image_paths[pos_index:pos_index + b_size]])
         batch_yy = np.asarray([one_hot_function(files_list[child_index]) for x in image_paths[pos_index:pos_index + b_size]])
         pos_index = pos_index + b_size
     else:
-        print('false')
+        #print('false')
         batch_yy1 = np.asarray([one_hot_function(files_list[child_index]) for x in image_paths[pos_index:len(test)]])
 
         image_paths = [x for x in image_paths[pos_index:len(test)]]
@@ -113,13 +113,13 @@ child_index = 0
 pos_index = 0
 b_size = 50
 
-x = batch(filenames, child_index, b_size, pos_index)
+#x = batch(filenames, child_index, b_size, pos_index)
 # print(x[0],x[2])
 # print(len(x))
 # print(x[0])
 # image = x[0, :]
-print x[0].shape
-print x[1].shape
+# print x[0].shape
+# print x[1].shape
 
 
 # np.savetxt(path_init+'/test.txt', x[0], delimiter=';', newline='\n')
@@ -133,7 +133,7 @@ print x[1].shape
 
 # Parameters
 learning_rate = 0.001
-training_iters = 100
+training_iters = 200000
 display_step = 10
 
 # Network Parameters
@@ -142,7 +142,7 @@ n_classes = 125 #  total classes (airplane or not)
 dropout = 0.75 # Dropout, probability to keep units
 
 # tf Graph input
-x = tf.placeholder(tf.float32, [None, n_input,n_input])
+x = tf.placeholder(tf.float32, [None, n_input, n_input])
 y = tf.placeholder(tf.float32, [None, n_classes])
 keep_prob = tf.placeholder(tf.float32) #dropout (keep probability)
 
@@ -165,30 +165,34 @@ def conv_net(x, weights, biases, dropout):
     #
     # Convolution Layer
     conv1 = conv2d(x, weights['wc1'], biases['bc1'])
+    print(conv1.get_shape().as_list())
     # Max Pooling (down-sampling)
     conv1 = maxpool2d(conv1, k=2)
+    print(conv1.get_shape().as_list())
     #
     # Convolution Layer
     conv2 = conv2d(conv1, weights['wc2'], biases['bc2'])
+    print(conv2.get_shape().as_list())
     # Max Pooling (down-sampling)
     conv2 = maxpool2d(conv2, k=2)
+    print(conv2.get_shape().as_list())
     # print( conv2.get_shape() )
 
     conv3 = conv2d(conv2, weights['wc3'], biases['bc3'])
+    print(conv3.get_shape().as_list())
     conv3 = maxpool2d(conv3, k=2)
+    print(conv3.get_shape().as_list())
+    print('----')
     # print( conv3.get_shape() )
 
 
     # Fully connected layer
     # Reshape conv3 output to fit fully connected layer input
     fc1 = tf.reshape(conv3, [-1, weights['wd1'].get_shape().as_list()[0]])
+    print(fc1.get_shape().as_list())
 
-    # conv3shape = conv3.get_shape().as_list()
-    # print (conv3shape)
-    #fc1 = tf.reshape(conv3, [-1, conv3shape[1] * conv3shape[2] * conv3shape[3]])
-    print (fc1.get_shape().as_list())
     fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
-    print (fc1.get_shape().as_list())
+    #print (fc1.get_shape().as_list())
     fc1 = tf.nn.relu(fc1)
     print (fc1.get_shape().as_list())
     # Apply Dropout
@@ -208,7 +212,7 @@ weights = {
     'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
     'wc3': tf.Variable(tf.random_normal([3, 3, 64, 20])),
     # fully connected, 7*7*64 inputs, 1024 outputs
-    'wd1': tf.Variable(tf.random_normal([16*16*20, 1024])),
+    'wd1': tf.Variable(tf.random_normal([8*8*20, 1024])),
     # 1024 inputs, 10 outputs (class prediction)
     'out': tf.Variable(tf.random_normal([1024, n_classes]))
 }
@@ -237,24 +241,17 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 # Initializing the variables
 init = tf.global_variables_initializer()
 
-
+i=1
 # Launch the graph
 with tf.Session() as sess:
     sess.run(init)
     step = 1
     # Keep training until reach max iterations
     while step * b_size < training_iters:
-        input = batch(filenames, child_index, b_size, pos_index)
-        batch_x = input[0]
-        print(batch_x.shape)
-        batch_y = input[1]
-        print(batch_y.shape)
-        child_index = input[2]
-        pos_index = input[3]
-        # cnt = cnt + batch_size
-        # mnist.train.next_batch(batch_size)
+        batch_x, batch_y, child_index, pos_index = batch(filenames, child_index, b_size, pos_index)
         # Run optimization op (backprop)
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y, keep_prob: dropout})
+
         if step % display_step == 0:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_x, y: batch_y, keep_prob: 1.})
@@ -263,8 +260,7 @@ with tf.Session() as sess:
             print(
                 "Iter " + str(step*b_size) +
                 ", Minibatch Loss= " + "{:.6f}".format(loss) +
-                ", Training Accuracy= " + "{:.5f}".format(acc) +
-                ", Testing Accuracy= " + "{:.5f}".format(t_acc)
+                ", Training Accuracy= " + "{:.5f}".format(acc)
             )
         step += 1
     print("Optimization Finished!")
