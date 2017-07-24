@@ -4,6 +4,7 @@ from PIL import Image
 import regex as re
 import tensorflow as tf
 
+
 # define file path of the folder of images
 path_init = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/rendered_256x256/256x256/sketch/tx_000000000000'
 # path_init = '/Users/nonborn/Desktop/test/'
@@ -109,10 +110,10 @@ def batch(files_list, child_index, b_size, pos_index):
 
 
 child_index = 0
-position = 708
-b_size = 20
+pos_index = 0
+b_size = 50
 
-x = batch(filenames, child_index, b_size, position)
+x = batch(filenames, child_index, b_size, pos_index)
 # print(x[0],x[2])
 # print(len(x))
 # print(x[0])
@@ -126,48 +127,23 @@ print x[1].shape
 
 
 
-
-
-
-'''
-
-def get_numpy(fpath):
-    im = Image.open(fpath)
-    im = im.convert('L') # to convert an image to grayscale
-    im = im.resize((64, 64), Image.ANTIALIAS)
-    im = np.asarray(im, dtype=np.float32)
-    return im
-
-
-b_size = 1
-cnt = 0
-
-if (cnt < len(files)):
-    batch = np.asarray([ get_numpy(fpath) for fpath in files[cnt:cnt + b_size]  ])
-    image = batch[0,:]
-    print batch.shape
-    #print batch
-
-
-
-# CNN
-
-import tensorflow as tf
+######################################################
+####################  C N N  #########################
+######################################################
 
 # Parameters
 learning_rate = 0.001
-training_iters = 30000
-batch_size = 1
-display_step = 1
+training_iters = 100
+display_step = 10
 
 # Network Parameters
 n_input = 64 #  data input (img shape: 64*64)
-n_classes = 2 #  total classes (airplane or not)
+n_classes = 125 #  total classes (airplane or not)
 dropout = 0.75 # Dropout, probability to keep units
 
 # tf Graph input
 x = tf.placeholder(tf.float32, [None, n_input,n_input])
-y = tf.placeholder(tf.float32, [None,])
+y = tf.placeholder(tf.float32, [None, n_classes])
 keep_prob = tf.placeholder(tf.float32) #dropout (keep probability)
 
 
@@ -196,21 +172,31 @@ def conv_net(x, weights, biases, dropout):
     conv2 = conv2d(conv1, weights['wc2'], biases['bc2'])
     # Max Pooling (down-sampling)
     conv2 = maxpool2d(conv2, k=2)
-    print( conv2.get_shape() )
+    # print( conv2.get_shape() )
+
     conv3 = conv2d(conv2, weights['wc3'], biases['bc3'])
-    print( conv3.get_shape() )
-    #
+    conv3 = maxpool2d(conv3, k=2)
+    # print( conv3.get_shape() )
+
+
     # Fully connected layer
-    # Reshape conv2 output to fit fully connected layer input
-#     fc1 = tf.reshape(conv2, [-1, weights['wd1'].get_shape().as_list()[0]])
-    fc1 = tf.reshape(conv3, [-1, 16*16*20])
+    # Reshape conv3 output to fit fully connected layer input
+    fc1 = tf.reshape(conv3, [-1, weights['wd1'].get_shape().as_list()[0]])
+
+    # conv3shape = conv3.get_shape().as_list()
+    # print (conv3shape)
+    #fc1 = tf.reshape(conv3, [-1, conv3shape[1] * conv3shape[2] * conv3shape[3]])
+    print (fc1.get_shape().as_list())
     fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
+    print (fc1.get_shape().as_list())
     fc1 = tf.nn.relu(fc1)
+    print (fc1.get_shape().as_list())
     # Apply Dropout
     fc1 = tf.nn.dropout(fc1, dropout)
-    #
+
     # Output, class prediction
     out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
+    print(out.get_shape().as_list())
     return out
 
 
@@ -239,6 +225,7 @@ biases = {
 # Construct model
 pred = conv_net(x, weights, biases, keep_prob)
 
+
 # Define loss and optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
@@ -256,26 +243,28 @@ with tf.Session() as sess:
     sess.run(init)
     step = 1
     # Keep training until reach max iterations
-    while step * batch_size < training_iters:
-        batch_x = batch
-        cnt = cnt + batch_size
-        batch_y = [1, 0]
-            #mnist.train.next_batch(batch_size)
+    while step * b_size < training_iters:
+        input = batch(filenames, child_index, b_size, pos_index)
+        batch_x = input[0]
+        print(batch_x.shape)
+        batch_y = input[1]
+        print(batch_y.shape)
+        child_index = input[2]
+        pos_index = input[3]
+        # cnt = cnt + batch_size
+        # mnist.train.next_batch(batch_size)
         # Run optimization op (backprop)
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y, keep_prob: dropout})
         if step % display_step == 0:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_x, y: batch_y, keep_prob: 1.})
             # Calculate accuracy for 256 mnist test images
-            t_acc = sess.run(accuracy, feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
+            #t_acc = sess.run(accuracy, feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
             print(
-                "Iter " + str(step*batch_size) +
+                "Iter " + str(step*b_size) +
                 ", Minibatch Loss= " + "{:.6f}".format(loss) +
                 ", Training Accuracy= " + "{:.5f}".format(acc) +
                 ", Testing Accuracy= " + "{:.5f}".format(t_acc)
             )
         step += 1
     print("Optimization Finished!")
-
-
-'''
