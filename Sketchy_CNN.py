@@ -5,6 +5,9 @@ import regex as re
 import tensorflow as tf
 
 
+
+# build test dataset -> https://stackoverflow.com/questions/701402/best-way-to-choose-a-random-file-from-a-directory
+
 # define file path of the folder of images
 path_init = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/rendered_256x256/256x256/sketch/tx_000000000000'
 # path_init = '/Users/nonborn/Desktop/test/'
