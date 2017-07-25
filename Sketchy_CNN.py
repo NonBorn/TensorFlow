@@ -105,7 +105,7 @@ def batch(files_list, child_index, b_size, pos_index):
 
         batch_xx = np.asarray([get_numpy(fpath) for fpath in image_paths2])
         pos_index = pos_index + add_images
-    return batch_xx,batch_yy, child_index, pos_index
+    return batch_xx, batch_yy, child_index, pos_index
 
 
 
