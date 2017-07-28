@@ -9,6 +9,7 @@ import tensorflow as tf
 import random as rng
 
 
+
 """""""""""""""""""""
 Global Parameters:
 
@@ -18,7 +19,7 @@ Global Parameters:
 Height = 64;
 Width = 64;
 # images_per_class represent the batch size of tensorflow as images_per_class * num_of_classes
-images_per_class = 5
+images_per_class = 2
 
 
 """""""""""""""""""""
@@ -27,8 +28,8 @@ Pre-Processing
 """""""""""""""""""""
 
 # define file path of the folder of images
-path_init = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/rendered_256x256/256x256/sketch/tx_000000000000'
-
+path_init = '/Users/nonborn/Desktop/Train Dataset'
+target = '/Users/nonborn/Desktop/Test Dataset'
 
 def exclude_os_files(files_path):
     # Regex expression for hidden mac os files
@@ -48,41 +49,197 @@ def get_numpy(fpath):
 
 
 def one_hot_function(word):
-    # Vocabulary & 1 hot vectors
-    text_idx = range(0, num_of_classes)
-    print(text_idx)
+    # Vocuabulary & 1 hot vectors
+    text_idx = range(0, 125)
+    #print(text_idx)
+    vocab_size = len(class_path1)
     text_length = len(text_idx)
-    one_hot = np.zeros(([num_of_classes, text_length]))
+    one_hot = np.zeros(([vocab_size, text_length]))
     one_hot[text_idx, np.arange(text_length)] = 1
     one_hot = one_hot.astype(int)
-    return one_hot[path.index(word)]
+    return one_hot[class_path1.index(word)]
 
 
-def random_batch():
-    class_path = exclude_os_files(path_init)
-    print(class_path)
-    random_images = [];
+def random_batch(fpath):
+    # exclude os files
+    class_path = exclude_os_files(fpath)
+    # print(class_path) # debugging - shows the list of folders within the parent folder
+
+    tmp_img_list = []
+    tmp_img_labels = []
+
     for f in range (0, num_of_classes):
         current_path = path_init + '/' + class_path[f]
         files = os.listdir(current_path)     # list of files in current path
         tmp = exclude_os_files(current_path)  # exclude system files
         index = rng.sample(range(0, len(tmp)), images_per_class)  # get a number of images per class - indexing
-        random_images_features = random_images + [current_path + '/' + files[s] for s in index]  # create paths of random images per class
-        random_images_labels = one_hot_function(files[s])
-    #print random_images
+        # print (class_path[f])
+        # create paths of random images per class
+        tmp_img_list = tmp_img_list + [current_path + '/' + files[s] for s in index]
+        tmp_img_labels = tmp_img_labels + [class_path[f] for s in index]
+    #print(tmp_img_labels)
+    #print(tmp_img_list)
+
+    random_images_features = np.asarray([get_numpy(t) for t in tmp_img_list])
+    #print(random_images_features.shape)
+    random_images_labels = np.asarray([one_hot_function(f) for f in tmp_img_labels])
+    #print(random_images_labels.shape)
+
     return random_images_features, random_images_labels
 
-
-
 # Variables Initialization
-class_path = exclude_os_files(path_init)
-num_of_classes = len(class_path);
+class_path1 = exclude_os_files(path_init)
+num_of_classes = len(class_path1);
 
 
-print (class_path);
+#print (class_path);
 print (num_of_classes)
 print (images_per_class*num_of_classes)
 
-random_batch()
 
 
+
+
+
+######################################################
+####################  C N N  #########################
+######################################################
+
+# Parameters
+learning_rate = 0.01
+training_iters = 200000
+display_step = 1
+
+# Network Parameters
+
+#  Data input (img shape: 64*64)
+n_input = 64
+# Dropout, probability to keep units
+dropout = 0.75
+
+# tf Graph input
+x = tf.placeholder(tf.float32, [None, n_input, n_input])
+y = tf.placeholder(tf.float32, [None, num_of_classes])
+keep_prob = tf.placeholder(tf.float32) #dropout (keep probability)
+
+
+# Create some wrappers for simplicity
+def conv2d(x, W, b, strides=1):
+    # Conv2D wrapper, with bias and relu activation
+    x = tf.nn.conv2d(x, W, strides=[1, strides, strides, 1], padding='SAME')
+    x = tf.nn.bias_add(x, b)
+    return tf.nn.relu(x)
+
+
+def maxpool2d(x, k=2):
+    # MaxPool2D wrapper
+    return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
+
+
+# Create model
+def conv_net(x, weights, biases, dropout):
+    # Reshape input picture
+    x = tf.reshape(x, shape=[-1, 64, 64, 1])
+    #
+    # Convolution Layer
+    conv1 = conv2d(x, weights['wc1'], biases['bc1'])
+    print(conv1.get_shape().as_list())
+    # Max Pooling (down-sampling)
+    conv1 = maxpool2d(conv1, k=2)
+    print(conv1.get_shape().as_list())
+    #
+    # Convolution Layer
+    conv2 = conv2d(conv1, weights['wc2'], biases['bc2'])
+    print(conv2.get_shape().as_list())
+    # Max Pooling (down-sampling)
+    conv2 = maxpool2d(conv2, k=2)
+    print(conv2.get_shape().as_list())
+    # print( conv2.get_shape() )
+
+    conv3 = conv2d(conv2, weights['wc3'], biases['bc3'])
+    print(conv3.get_shape().as_list())
+    conv3 = maxpool2d(conv3, k=2)
+    print(conv3.get_shape().as_list())
+    print('----')
+    # print( conv3.get_shape() )
+
+
+    # Fully connected layer
+    # Reshape conv3 output to fit fully connected layer input
+    fc1 = tf.reshape(conv3, [-1, weights['wd1'].get_shape().as_list()[0]])
+    print(fc1.get_shape().as_list())
+
+    fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
+    #print (fc1.get_shape().as_list())
+    fc1 = tf.nn.relu(fc1)
+    print (fc1.get_shape().as_list())
+    # Apply Dropout
+    fc1 = tf.nn.dropout(fc1, dropout)
+
+    # Output, class prediction
+    out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
+    print(out.get_shape().as_list())
+    return out
+
+
+# Store layers weight & bias
+weights = {
+    # 5x5 conv, 1 input, 32 outputs
+    'wc1': tf.Variable(tf.random_normal([5, 5, 1, 32])),
+    # 5x5 conv, 32 inputs, 64 outputs
+    'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
+    'wc3': tf.Variable(tf.random_normal([3, 3, 64, 20])),
+    # fully connected, 7*7*64 inputs, 1024 outputs
+    'wd1': tf.Variable(tf.random_normal([8*8*20, 1024])),
+    # 1024 inputs, 10 outputs (class prediction)
+    'out': tf.Variable(tf.random_normal([1024, num_of_classes]))
+}
+
+biases = {
+    'bc1': tf.Variable(tf.random_normal([32])),
+    'bc2': tf.Variable(tf.random_normal([64])),
+    'bc3': tf.Variable(tf.random_normal([20])),
+    'bd1': tf.Variable(tf.random_normal([1024])),
+    'out': tf.Variable(tf.random_normal([num_of_classes]))
+}
+
+
+# Construct model
+pred = conv_net(x, weights, biases, keep_prob)
+
+
+# Define loss and optimizer
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+# Evaluate model
+correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
+accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+# Initializing the variables
+init = tf.global_variables_initializer()
+
+i=1
+# Launch the graph
+with tf.Session() as sess:
+    sess.run(init)
+    step = 1
+    # Keep training until reach max iterations
+    while step * num_of_classes * images_per_class < training_iters:
+        batch_x, batch_y, = random_batch(path_init)
+        # Run optimization op (backprop)
+        sess.run(optimizer, feed_dict={x: batch_x, y: batch_y, keep_prob: dropout})
+
+        if step % display_step == 0:
+            # Calculate batch loss and accuracy
+            loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_x, y: batch_y, keep_prob: 1.})
+            # Calculate accuracy for 256 mnist test images
+            #t_acc = sess.run(accuracy, feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
+            print(
+                "Iter " + str(step * num_of_classes * images_per_class) +
+                ", Minibatch Loss = " + "{:.0f}".format(loss) +
+                ", Training Accuracy = " + "{:.5f}".format(acc) +
+                ", Test Accuracy = " + "{:.5f}".format(sess.run(accuracy, feed_dict={x: random_batch(target)[0], y: random_batch(target)[1], keep_prob: 1.}))
+            )
+            step += 1
+    print("Optimization Finished!")
