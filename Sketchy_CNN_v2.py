@@ -16,10 +16,11 @@ Global Parameters:
 """""""""""""""""""""
 
 # Resized source input image dimensions:
-Height = 64;
-Width = 64;
+Height = 256;
+Width = Height;
 # images_per_class represent the batch size of tensorflow as images_per_class * num_of_classes
-images_per_class = 2
+images_per_class = 32
+
 
 
 """""""""""""""""""""
@@ -28,8 +29,8 @@ Pre-Processing
 """""""""""""""""""""
 
 # define file path of the folder of images
-path_init = '/Users/nonborn/Desktop/Train Dataset'
-target = '/Users/nonborn/Desktop/Test Dataset'
+path_init = '/Users/nonborn/Desktop/test/train'
+target = '/Users/nonborn/Desktop/test/test'
 
 def exclude_os_files(files_path):
     # Regex expression for hidden mac os files
@@ -50,7 +51,7 @@ def get_numpy(fpath):
 
 def one_hot_function(word):
     # Vocuabulary & 1 hot vectors
-    text_idx = range(0, 125)
+    text_idx = range(0, num_of_classes)
     #print(text_idx)
     vocab_size = len(class_path1)
     text_length = len(text_idx)
@@ -93,8 +94,10 @@ num_of_classes = len(class_path1);
 
 
 #print (class_path);
-print (num_of_classes)
-print (images_per_class*num_of_classes)
+print ('\n')
+print ('Number of Classes: ' + str(num_of_classes))
+print ('Batch Size: ' + str(images_per_class*num_of_classes)+ '\n')
+
 
 
 
@@ -106,16 +109,22 @@ print (images_per_class*num_of_classes)
 ######################################################
 
 # Parameters
-learning_rate = 0.01
+learning_rate = 0.001
 training_iters = 200000
 display_step = 1
+lvl1_out = 48
+lvl2_out = 128
+lvl3_out = 192
+lvl4_out = 192
+lvl5_out = 128
+cl_out = 2048
 
 # Network Parameters
 
 #  Data input (img shape: 64*64)
-n_input = 64
+n_input = Height
 # Dropout, probability to keep units
-dropout = 0.75
+dropout = 0.5
 
 # tf Graph input
 x = tf.placeholder(tf.float32, [None, n_input, n_input])
@@ -139,34 +148,42 @@ def maxpool2d(x, k=2):
 # Create model
 def conv_net(x, weights, biases, dropout):
     # Reshape input picture
-    x = tf.reshape(x, shape=[-1, 64, 64, 1])
+    x = tf.reshape(x, shape=[-1, n_input, n_input, 1])
     #
     # Convolution Layer
     conv1 = conv2d(x, weights['wc1'], biases['bc1'])
-    print(conv1.get_shape().as_list())
+    #print(conv1.get_shape().as_list())
     # Max Pooling (down-sampling)
     conv1 = maxpool2d(conv1, k=2)
-    print(conv1.get_shape().as_list())
+    print('Conv. Layer 1: ' + str(conv1.get_shape().as_list()))
     #
     # Convolution Layer
     conv2 = conv2d(conv1, weights['wc2'], biases['bc2'])
-    print(conv2.get_shape().as_list())
+    #print(conv2.get_shape().as_list())
     # Max Pooling (down-sampling)
-    conv2 = maxpool2d(conv2, k=2)
-    print(conv2.get_shape().as_list())
-    # print( conv2.get_shape() )
+    conv2 = maxpool2d(conv2, k=1)
+    print('Conv. Layer 2: ' + str(conv2.get_shape().as_list()))
 
     conv3 = conv2d(conv2, weights['wc3'], biases['bc3'])
-    print(conv3.get_shape().as_list())
-    conv3 = maxpool2d(conv3, k=2)
-    print(conv3.get_shape().as_list())
-    print('----')
-    # print( conv3.get_shape() )
+    #print(conv3.get_shape().as_list())
+    #conv3 = maxpool2d(conv3, k=2)
+    print('Conv. Layer 3: ' + str(conv3.get_shape().as_list()))
 
+    conv4 = conv2d(conv3, weights['wc4'], biases['bc4'])
+    #print(conv4.get_shape().as_list())
+    #conv4 = maxpool2d(conv4, k=2)
+    print('Conv. Layer 4: ' + str(conv4.get_shape().as_list()))
+
+    conv5 = conv2d(conv4, weights['wc5'], biases['bc5'])
+    # print(conv4.get_shape().as_list())
+    conv5 = maxpool2d(conv5, k=2)
+    print('Conv. Layer 5: ' + str(conv5.get_shape().as_list()))
+
+    print('----')
 
     # Fully connected layer
     # Reshape conv3 output to fit fully connected layer input
-    fc1 = tf.reshape(conv3, [-1, weights['wd1'].get_shape().as_list()[0]])
+    fc1 = tf.reshape(conv5, [-1, weights['wd1'].get_shape().as_list()[0]])
     print(fc1.get_shape().as_list())
 
     fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
@@ -185,21 +202,25 @@ def conv_net(x, weights, biases, dropout):
 # Store layers weight & bias
 weights = {
     # 5x5 conv, 1 input, 32 outputs
-    'wc1': tf.Variable(tf.random_normal([5, 5, 1, 32])),
+    'wc1': tf.Variable(tf.random_normal([10, 10, 1, lvl1_out])),
     # 5x5 conv, 32 inputs, 64 outputs
-    'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
-    'wc3': tf.Variable(tf.random_normal([3, 3, 64, 20])),
+    'wc2': tf.Variable(tf.random_normal([5, 5, lvl1_out, lvl2_out])),
+    'wc3': tf.Variable(tf.random_normal([3, 3, lvl2_out, lvl3_out])),
+    'wc4': tf.Variable(tf.random_normal([3, 3, lvl3_out, lvl4_out])),
+    'wc5': tf.Variable(tf.random_normal([3, 3, lvl4_out, lvl5_out])),
     # fully connected, 7*7*64 inputs, 1024 outputs
-    'wd1': tf.Variable(tf.random_normal([8*8*20, 1024])),
+    'wd1': tf.Variable(tf.random_normal([16 * 16 * 16 * lvl5_out, cl_out])),
     # 1024 inputs, 10 outputs (class prediction)
-    'out': tf.Variable(tf.random_normal([1024, num_of_classes]))
+    'out': tf.Variable(tf.random_normal([cl_out, num_of_classes]))
 }
 
 biases = {
-    'bc1': tf.Variable(tf.random_normal([32])),
-    'bc2': tf.Variable(tf.random_normal([64])),
-    'bc3': tf.Variable(tf.random_normal([20])),
-    'bd1': tf.Variable(tf.random_normal([1024])),
+    'bc1': tf.Variable(tf.random_normal([lvl1_out])),
+    'bc2': tf.Variable(tf.random_normal([lvl2_out])),
+    'bc3': tf.Variable(tf.random_normal([lvl3_out])),
+    'bc4': tf.Variable(tf.random_normal([lvl4_out])),
+    'bc5': tf.Variable(tf.random_normal([lvl5_out])),
+    'bd1': tf.Variable(tf.random_normal([cl_out])),
     'out': tf.Variable(tf.random_normal([num_of_classes]))
 }
 

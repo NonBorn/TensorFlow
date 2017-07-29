@@ -10,7 +10,7 @@ import tensorflow as tf
 
 # define file path of the folder of images
 path_init = '/Users/nonborn/[MSc] Business Analytics/3rd Semester/[SQ-PT-2017] Social Network Analysis and Social Media Analytics/Assignment (tensorflow)/rendered_256x256/256x256/sketch/tx_000000000000'
-# path_init = '/Users/nonborn/Desktop/test/'
+# path_init = '/Users/nonborn/Desktop/test/train'
 
 # print(len(files))
 # print('Folders in Directory of Parent Folder')
@@ -114,7 +114,7 @@ def batch(files_list, child_index, b_size, pos_index):
 
 child_index = 0
 pos_index = 0
-b_size = 20
+b_size = 23
 
 #x = batch(filenames, child_index, b_size, pos_index)
 # print(x[0],x[2])
