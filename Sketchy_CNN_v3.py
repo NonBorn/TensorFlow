@@ -4,12 +4,11 @@ Import required libraries
 """""""""""""""""""""""""""
 
 import os
-import sys
 import numpy as np
 from PIL import Image
 import regex as re
 import tensorflow as tf
-import random as rng
+from datetime import datetime
 
 
 """""""""""""""""""""
@@ -156,7 +155,6 @@ for i in range(0, 200):
 
 
 
-
 ######################################################
 ####################  C N N  #########################
 ######################################################
@@ -283,11 +281,12 @@ with tf.Session() as sess:
     sess.run(init)
     step = 1
     # Keep training until reach max iterations
-    while step * batch_size < training_iters:
+    while t_acc <= 0.9:
+        #step * batch_size < training_iters :
         if ind == 0:
+            tt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             Epoch = Epoch + 1
-            print('Epoch: ' + str(Epoch))
-        #print('Index: ' + str(ind))
+            print('Epoch ' + str(Epoch) + ' (' + str(tt) + ')')
         batch_x, batch_y, ind = random_batch(train_image_paths, ind)
         # Run optimization op (backprop)
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y, keep_prob: dropout})
@@ -296,14 +295,12 @@ with tf.Session() as sess:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_x, y: batch_y, keep_prob: 1.})
             # Calculate accuracy for 256 mnist test images
-            #t_acc = sess.run(accuracy, feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
+            t_acc = sess.run(accuracy, feed_dict={x: test_xx, y: test_yy, keep_prob: 1.})
             print(
                 "Iter " + str(step * batch_size) +
                 ", Minibatch Loss= " + "{:.2f}".format(loss) +
                 ", Training Accuracy= " + "{:.5f}".format(acc) +
-                ", Test Accuracy = " + "{:.5f}".format(sess.run(accuracy, feed_dict={x: test_xx,
-                                                                                     y: test_yy,
-                                                                                     keep_prob: 1.}))
+                ", Test Accuracy = " + "{:.5f}".format(t_acc))
             )
         step += 1
     print("Optimization Finished!")
