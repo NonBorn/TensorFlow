@@ -1,6 +1,7 @@
-"""
+"""""""""""""""""""""""""""
 Import required libraries
-"""
+
+"""""""""""""""""""""""""""
 import os
 import numpy as np
 from PIL import Image
