@@ -163,6 +163,7 @@ for i in range(0, 200):
 learning_rate = 0.001
 training_iters = 200000
 display_step = 10
+t_acc = 0
 
 # Network Parameters
 n_classes = 125             # Total classes (airplane or not)
@@ -281,12 +282,14 @@ with tf.Session() as sess:
     sess.run(init)
     step = 1
     # Keep training until reach max iterations
+    st = datetime.now().strftime('%Y-%m-%d %H:%M:%S\n')
+    print ('DNN Training Start Time: ' + st)
     while t_acc <= 0.9:
         #step * batch_size < training_iters :
         if ind == 0:
-            tt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             Epoch = Epoch + 1
-            print('Epoch ' + str(Epoch) + ' (' + str(tt) + ')')
+            est = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            print('Epoch ' + str(Epoch) + ' (' + str(est) + ')')
         batch_x, batch_y, ind = random_batch(train_image_paths, ind)
         # Run optimization op (backprop)
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y, keep_prob: dropout})
@@ -300,7 +303,9 @@ with tf.Session() as sess:
                 "Iter " + str(step * batch_size) +
                 ", Minibatch Loss= " + "{:.2f}".format(loss) +
                 ", Training Accuracy= " + "{:.5f}".format(acc) +
-                ", Test Accuracy = " + "{:.5f}".format(t_acc))
+                ", Test Accuracy = " + "{:.5f}".format(t_acc)
             )
         step += 1
     print("Optimization Finished!")
+    et = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print ('DNN Training End Time: ', et)
