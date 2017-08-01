@@ -4,9 +4,9 @@ import os, errno
 import shutil
 
 # define file path of the folder of images
-path_init = '/Users/nonborn/Desktop/Test Dataset'
+path_init = '/Users/nonborn/Desktop/tx_000100000000/Initial Test'
 #target = '/Users/nonborn/Desktop/Test Dataset'
-target_train = '/Users/nonborn/Desktop/whole_test'
+target_train = '/Users/nonborn/Desktop/tx_000100000000/Test Dataset'
 
 def exclude_os_files(files_path):
     # Regex expression for hidden mac os files
@@ -25,7 +25,7 @@ tmp_img_list = []
 
 i = 0
 """num_of_classes"""
-for f in range(0, num_of_classes    ):
+for f in range(0, num_of_classes):
     #print(class_path[f])
     source_path = path_init + '/' + class_path[f]
     target_path = target_train
@@ -36,4 +36,4 @@ for f in range(0, num_of_classes    ):
         i=i+1
         sp2 = source_path + '/' + j
         newname = class_path[f] + '_' + str(i) + '.png'
-        shutil.copy(sp2, target_path + '/' +newname)
+        shutil.move(sp2, target_path + '/' +newname)

@@ -4,8 +4,8 @@ import os, errno
 import shutil
 
 # define file path of the folder of images
-path_init = '/Users/nonborn/Desktop/Train Dataset'
-target = '/Users/nonborn/Desktop/Test Dataset'
+path_init = '/Users/nonborn/Desktop/tx_000100000000/Train Dataset'
+target = '/Users/nonborn/Desktop/tx_000100000000/Test Dataset'
 
 def exclude_os_files(files_path):
     # Regex expression for hidden mac os files
