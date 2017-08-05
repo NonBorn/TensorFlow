@@ -100,7 +100,7 @@ display_step = 1
 lvl1_out = 32
 lvl2_out = 64
 lvl3_out = 20
-cl_out = 2048
+cl_out = 1024
 
 # Network Parameters
 
