@@ -33,8 +33,8 @@ for f in range(0, num_of_classes):
     # create paths of random images per class
     source_img_list = tmp_img_list + [source_path + '/' + files[s] for s in index]
 
-    # print(source_img_list)
-
+    #print(source_img_list)
+    #
     try:
         os.makedirs(target_path)
     except OSError as e:
