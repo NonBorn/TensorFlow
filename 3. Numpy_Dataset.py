@@ -25,13 +25,13 @@ def one_hot_function(word):
     # Vocabulary & 1 hot vectors
     text_idx = range(0, 125)
     #print(text_idx)
-    vocab_size = len(class_path1)
+    vocab_size = len(init_path)
     #print(vocab_size)
     text_length = len(text_idx)
     one_hot = np.zeros(([vocab_size, text_length]))
     one_hot[text_idx, np.arange(text_length)] = 1
     one_hot = one_hot.astype(int)
-    return one_hot[class_path1.index(word)]
+    return one_hot[init_path.index(word)]
 
 
 def random_batch (dir, index, batch_size):
@@ -68,43 +68,38 @@ print(len(os.listdir(src_test_path)))
 
 
 tr_files = exclude_os_files(src_train_path)
-print(tr_files[0])
 sketch_size = 128
 
-# for i in range(0, len(os.listdir(train_path))-1):
-#     tpath = train_path + '/' + tr_files[i]
-#     img = get_numpy(tpath, sketch_size, sketch_size)
-#     np.save(target_path + '/' + tr_files[i], img)
+for i in range(0, len(os.listdir(src_train_path))-1):
+    tpath = src_train_path + '/' + tr_files[i]
+    img = get_numpy(tpath, sketch_size, sketch_size)
+    np.save(np_train_path + '/' + tr_files[i].rsplit('.', 1)[0], img)
 
 
-tr_files = exclude_os_files(test_path)
+tr_files = exclude_os_files(src_test_path)
 
-# for i in range(0, len(os.listdir(test_path))-1):
-#     tpath = test_path + '/' + tr_files[i]
-#     img = get_numpy(tpath, sketch_size, sketch_size)
-#     np.save(target_test_path + '/' + tr_files[i], img)
+for i in range(0, len(os.listdir(src_test_path))-1):
+    tpath = src_test_path + '/' + tr_files[i]
+    img = get_numpy(tpath, sketch_size, sketch_size)
+    np.save(np_test_path + '/' + tr_files[i].rsplit('.', 1)[0], img)
 
 
 # One-hot Vectors - Train
 
-tr_files = exclude_os_files(train_path)
+tr_files = exclude_os_files(src_train_path)
 
-# target_path = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Train_Labels'
-#
-# for i in range(0, len(os.listdir(train_path))-1):
-#     tpath = train_path + '/' + tr_files[i]
-#     class_ = tpath.rsplit('_', 1)[0].rsplit('/', 1)[1]
-#     #print(class_)
-#     x = one_hot_function(class_)
-#     np.save(target_path + '/' + tr_files[i], x)
+np_train_path_lb = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Train_Labels'
 
-#
-# test_path = '/Users/nonborn/Desktop/tx_000100000000/Test Dataset'
-# target_test_path = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Test_Labels'
-#
-# for i in range(0, len(os.listdir(test_path))-1):
-#     tpath = test_path + '/' + tr_files[i]
-#     class_ = tpath.rsplit('_', 1)[0].rsplit('/', 1)[1]
-#     print(class_)
-#     x = one_hot_function(class_)
-#     np.save(target_test_path + '/' + tr_files[i], x)
+for i in range(0, len(os.listdir(src_train_path))-1):
+    tpath = src_train_path + '/' + tr_files[i]
+    class_ = tpath.rsplit('_', 1)[0].rsplit('/', 1)[1]
+    x = one_hot_function(class_)
+    np.save(np_train_path_lb + '/' + tr_files[i].rsplit('.', 1)[0], x)
+
+target_test_path_lb = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Test_Labels'
+
+for i in range(0, len(os.listdir(src_test_path))-1):
+    tpath = src_test_path + '/' + tr_files[i]
+    class_ = tpath.rsplit('_', 1)[0].rsplit('/', 1)[1]
+    x = one_hot_function(class_)
+    np.save(target_test_path_lb + '/' + tr_files[i].rsplit('.', 1)[0], x)
