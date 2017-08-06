@@ -19,9 +19,6 @@ Global Parameters:
 # Resized source input image dimensions:
 Height = 128;
 Width = Height;
-# images_per_class represent the batch size of tensorflow as images_per_class * num_of_classes
-images_per_class = 32
-
 
 
 """""""""""""""""""""
@@ -89,6 +86,8 @@ test_images_labels = [np.load(test_label_path[x]) for x in range(0, len(test_lab
 
 
 
+
+
 ######################################################
 ####################  C N N  #########################
 ######################################################
@@ -131,30 +130,33 @@ def maxpool2d(x, k=2):
 # Create model
 def conv_net(x, weights, biases, dropout):
     # Reshape input picture
-    x = tf.reshape(x, shape=[-1, n_input, n_input, 1])
+    x = tf.reshape(x, shape=[-1, 128, 128, 1])
     #
     # Convolution Layer
     conv1 = conv2d(x, weights['wc1'], biases['bc1'])
-    #print(conv1.get_shape().as_list())
+    print(conv1.get_shape().as_list())
     # Max Pooling (down-sampling)
     conv1 = maxpool2d(conv1, k=2)
-    print('Conv. Layer 1: ' + str(conv1.get_shape().as_list()))
+    print(conv1.get_shape().as_list())
     #
     # Convolution Layer
     conv2 = conv2d(conv1, weights['wc2'], biases['bc2'])
-    #print(conv2.get_shape().as_list())
+    print(conv2.get_shape().as_list())
     # Max Pooling (down-sampling)
-    conv2 = maxpool2d(conv2, k=1)
-    print('Conv. Layer 2: ' + str(conv2.get_shape().as_list()))
+    conv2 = maxpool2d(conv2, k=2)
+    print(conv2.get_shape().as_list())
+    # print( conv2.get_shape() )
 
     conv3 = conv2d(conv2, weights['wc3'], biases['bc3'])
-    #print(conv3.get_shape().as_list())
-    #conv3 = maxpool2d(conv3, k=2)
-    print('Conv. Layer 3: ' + str(conv3.get_shape().as_list()))
-
+    print(conv3.get_shape().as_list())
+    conv3 = maxpool2d(conv3, k=2)
+    print(conv3.get_shape().as_list())
     print('----')
+    # print( conv3.get_shape() )
+
 
     # Fully connected layer
+
     # Reshape conv3 output to fit fully connected layer input
     fc1 = tf.reshape(conv3, [-1, weights['wd1'].get_shape().as_list()[0]])
     print(fc1.get_shape().as_list())
@@ -175,23 +177,25 @@ def conv_net(x, weights, biases, dropout):
 # Store layers weight & bias
 weights = {
     # 5x5 conv, 1 input, 32 outputs
-    'wc1': tf.Variable(tf.random_normal([5, 5, 1, lvl1_out])),
+    'wc1': tf.Variable(tf.random_normal([5, 5, 1, 32])),
     # 5x5 conv, 32 inputs, 64 outputs
-    'wc2': tf.Variable(tf.random_normal([3, 3, lvl1_out, lvl2_out])),
-    'wc3': tf.Variable(tf.random_normal([3, 3, lvl2_out, lvl3_out])),
+    'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
+    'wc3': tf.Variable(tf.random_normal([3, 3, 64, 20])),
     # fully connected, 7*7*64 inputs, 1024 outputs
-    'wd1': tf.Variable(tf.random_normal([8 * 8 * lvl3_out, cl_out])),
+    'wd1': tf.Variable(tf.random_normal([4 * 8 * 8 * 20, 1024])),
     # 1024 inputs, 10 outputs (class prediction)
-    'out': tf.Variable(tf.random_normal([cl_out, num_of_classes]))
+    'out': tf.Variable(tf.random_normal([1024, num_of_classes]))
 }
 
 biases = {
-    'bc1': tf.Variable(tf.random_normal([lvl1_out])),
-    'bc2': tf.Variable(tf.random_normal([lvl2_out])),
-    'bc3': tf.Variable(tf.random_normal([lvl3_out])),
-    'bd1': tf.Variable(tf.random_normal([cl_out])),
+    'bc1': tf.Variable(tf.random_normal([32])),
+    'bc2': tf.Variable(tf.random_normal([64])),
+    'bc3': tf.Variable(tf.random_normal([20])),
+    'bd1': tf.Variable(tf.random_normal([1024])),
     'out': tf.Variable(tf.random_normal([num_of_classes]))
 }
+
+
 
 
 # Construct model
@@ -215,8 +219,10 @@ with tf.Session() as sess:
     sess.run(init)
     step = 1
     # Keep training until reach max iterations
-    while step * num_of_classes * images_per_class < training_iters:
+    while step * num_of_classes < training_iters:
         batch_x, batch_y, = random_batch(train_path, train_path_labels, batch_size)
+        print(np.shape(batch_x))
+        print(np.shape(batch_y))
         # Run optimization op (backprop)
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y, keep_prob: dropout})
 
@@ -224,12 +230,12 @@ with tf.Session() as sess:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_x, y: batch_y, keep_prob: 1.})
             # Calculate accuracy for 256 mnist test images
-            #t_acc = sess.run(accuracy, feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
+            t_acc = sess.run(accuracy, feed_dict={x: test_images_features[:250], y: test_images_labels[:250], keep_prob: 1.})
             print(
-                "Iter " + str(step * num_of_classes * images_per_class) +
+                "Iter " + str(step * num_of_classes) +
                 ", Minibatch Loss = " + "{:.0f}".format(loss) +
                 ", Training Accuracy = " + "{:.5f}".format(acc) +
-                ", Test Accuracy = " + "{:.5f}".format(sess.run(accuracy, feed_dict={x: test_images_features, y: test_images_labels, keep_prob: 1.}))
+                ", Test Accuracy = " + "{:.5f}".format(t_acc)
             )
             step += 1
     print("Optimization Finished!")
