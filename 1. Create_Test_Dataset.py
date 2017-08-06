@@ -1,6 +1,7 @@
 import regex as re
 import random as rng
-import os, errno
+import os
+import errno
 import shutil
 
 # define file path of the folder of images
@@ -13,11 +14,11 @@ def exclude_os_files(files_path):
     filenames = [x for x in os.listdir(files_path) if not reg.match(x)]
     return filenames
 
-
 class_path = exclude_os_files(path_init)
 num_of_classes = len(class_path)
 
-print(class_path) # debugging - shows the list of folders within the parent folder
+# debugging - shows the list of folders within the parent folder
+print(class_path)
 
 tmp_img_list = []
 
@@ -42,4 +43,4 @@ for f in range(0, num_of_classes):
             raise
 
     for f in source_img_list:
-        shutil.move(f, target_path)
+        shutil.copy(f, target_path)

@@ -75,7 +75,7 @@ def seq_batch(fpath_train, fpath_labels, b_size, ind):
 
 # Variables Initialization
 num_of_classes = 125
-batch_size = 1000
+batch_size = 10
 g_index = 0
 
 
