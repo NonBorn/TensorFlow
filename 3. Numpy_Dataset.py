@@ -52,15 +52,15 @@ def random_batch (dir, index, batch_size):
     return batch_xx, batch_yy, t_index
 
 
-src_train_path = '/Users/nonborn/Desktop/tx_000100000000/Train Dataset'
-src_test_path = '/Users/nonborn/Desktop/tx_000100000000/Test Dataset'
+src_train_path = '/Users/nonborn/Desktop/Dataset/Restructured/Train'
+src_test_path = '/Users/nonborn/Desktop/Dataset/Restructured/Test'
 
 # get actual classes
-init_path = '/Users/nonborn/Desktop/tx_000100000000/Initial Train'
+init_path = '/Users/nonborn/Desktop/Dataset/Original'
 init_path = exclude_os_files(init_path)
 
-np_train_path = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Train'
-np_test_path = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Test'
+np_train_path = '/Users/nonborn/Desktop/Dataset/Numpy/Train'
+np_test_path = '/Users/nonborn/Desktop/Dataset/Numpy/Test'
 
 # check the number of instances for train and test data set
 print(len(os.listdir(src_train_path)))
@@ -69,26 +69,26 @@ print(len(os.listdir(src_test_path)))
 
 tr_files = exclude_os_files(src_train_path)
 sketch_size = 128
-
-for i in range(0, len(os.listdir(src_train_path))-1):
-    tpath = src_train_path + '/' + tr_files[i]
-    img = get_numpy(tpath, sketch_size, sketch_size)
-    np.save(np_train_path + '/' + tr_files[i].rsplit('.', 1)[0], img)
-
-
-tr_files = exclude_os_files(src_test_path)
-
-for i in range(0, len(os.listdir(src_test_path))-1):
-    tpath = src_test_path + '/' + tr_files[i]
-    img = get_numpy(tpath, sketch_size, sketch_size)
-    np.save(np_test_path + '/' + tr_files[i].rsplit('.', 1)[0], img)
+#
+# for i in range(0, len(os.listdir(src_train_path))-1):
+#     tpath = src_train_path + '/' + tr_files[i]
+#     img = get_numpy(tpath, sketch_size, sketch_size)
+#     np.save(np_train_path + '/' + tr_files[i].rsplit('.', 1)[0], img)
+#
+#
+# tr_files = exclude_os_files(src_test_path)
+#
+# for i in range(0, len(os.listdir(src_test_path))-1):
+#     tpath = src_test_path + '/' + tr_files[i]
+#     img = get_numpy(tpath, sketch_size, sketch_size)
+#     np.save(np_test_path + '/' + tr_files[i].rsplit('.', 1)[0], img)
 
 
 # One-hot Vectors - Train
 
 tr_files = exclude_os_files(src_train_path)
 
-np_train_path_lb = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Train_Labels'
+np_train_path_lb = '/Users/nonborn/Desktop/Dataset/Numpy/Train_Labels'
 
 for i in range(0, len(os.listdir(src_train_path))-1):
     tpath = src_train_path + '/' + tr_files[i]
@@ -96,7 +96,7 @@ for i in range(0, len(os.listdir(src_train_path))-1):
     x = one_hot_function(class_)
     np.save(np_train_path_lb + '/' + tr_files[i].rsplit('.', 1)[0], x)
 
-target_test_path_lb = '/Users/nonborn/Desktop/tx_000100000000/Numpy/Test_Labels'
+target_test_path_lb = '/Users/nonborn/Desktop/Dataset/Numpy/Test_Labels'
 tr_files = exclude_os_files(src_test_path)
 
 for i in range(0, len(os.listdir(src_test_path))-1):
